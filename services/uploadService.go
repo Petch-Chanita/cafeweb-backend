@@ -20,7 +20,7 @@ func NewUploadService(db *gorm.DB) *UploadService {
 }
 
 // ฟังก์ชันสำหรับอัปโหลดไฟล์
-func (s *UploadService) UploadFile(cafeID string, file *multipart.FileHeader) (string, error) {
+func (s *UploadService) UploadFile(cafeID string, userID string, file *multipart.FileHeader) (string, error) {
 	uploadDir := "uploads"
 
 	// ตรวจสอบว่ามีโฟลเดอร์ `uploads` หรือไม่ ถ้าไม่มีให้สร้างใหม่
@@ -66,6 +66,7 @@ func (s *UploadService) UploadFile(cafeID string, file *multipart.FileHeader) (s
 		URL:      fileUrl,
 		Filename: file.Filename,
 		CafeID:   cafeID,
+		UserID:   userID,
 	}
 
 	if err := s.DB.Create(&image).Error; err != nil {

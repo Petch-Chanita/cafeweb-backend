@@ -7,6 +7,7 @@ type Abouts struct {
 	CafeID string `gorm:"type:uuid;index" json:"cafe_id"` // Foreign key ที่อ้างอิงจาก Cafe
 	Cafe   Cafes  `gorm:"foreignKey:CafeID" json:"cafe"`  // ความสัมพันธ์กับ Cafe
 
-	AboutEn *string `gorm:"type:text" json:"about_en"` // คำอธิบายภาษาอังกฤษ
-	AboutTh *string `gorm:"type:text" json:"about_th"` // คำอธิบายภาษาไทย
+	AboutEn  *string `gorm:"type:text" json:"about_en"` // คำอธิบายภาษาอังกฤษ
+	AboutTh  *string `gorm:"type:text" json:"about_th"` // คำอธิบายภาษาไทย
+	ImageURL string  `gorm:"type:text" json:"image_url,omitempty"`
 }

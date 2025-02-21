@@ -2,9 +2,11 @@ package utils
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
+	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 )
 
@@ -40,10 +42,38 @@ func ParseToken(tokenStr string) (jwt.MapClaims, error) {
 		return nil, err
 	}
 
-	// ตรวจสอบว่า token เป็น valid
+	// ตรวจสอบว่า token เป็น valid และไม่หมดอายุ
 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+		// ตรวจสอบว่า token หมดอายุหรือไม่
+		if exp, ok := claims["exp"].(float64); ok {
+			if time.Now().Unix() > int64(exp) {
+				return nil, fmt.Errorf("token has expired")
+			}
+		}
 		return claims, nil
 	} else {
 		return nil, fmt.Errorf("invalid token")
 	}
+}
+
+// ตรวจสอบและดึงข้อมูลจาก JWT Token
+func GetClaimsFromToken(ctx *gin.Context) (jwt.MapClaims, error) {
+	// รับ Authorization header จาก request
+	authHeader := ctx.GetHeader("Authorization")
+
+	// ตรวจสอบว่า header มีหรือไม่
+	if authHeader == "" {
+		return nil, fmt.Errorf("Authorization header is required")
+	}
+
+	// แยก Bearer Token
+	tokenStr := strings.TrimPrefix(authHeader, "Bearer ")
+
+	// ตรวจสอบความถูกต้องของ Token
+	claims, err := ParseToken(tokenStr)
+	if err != nil {
+		return nil, fmt.Errorf("Invalid or expired token: %v", err)
+	}
+
+	return claims, nil
 }

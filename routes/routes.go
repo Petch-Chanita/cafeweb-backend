@@ -21,6 +21,9 @@ func SetUpRoutes(router *gin.Engine) {
 	uploadService := services.NewUploadService(config.DB)
 	uploadController := controllers.NewUploadController(uploadService)
 
+	aboutService := services.NewAboutService(config.DB)
+	aboutController := controllers.NewAboutController(aboutService)
+
 	router.Static("/uploads", "./uploads")
 	// ตั้งค่า route สำหรับการอัปโหลด
 	router.POST("/api/upload/:cafe_id", uploadController.UploadImage)
@@ -43,5 +46,11 @@ func SetUpRoutes(router *gin.Engine) {
 		cafeApi.GET("/:id", cafeController.GetCafeById)
 		cafeApi.PUT("/update-cafe/:id", cafeController.UpdateCafe)
 		cafeApi.POST("/create-cafe", cafeController.CreateCafe)
+	}
+	aboutApi := router.Group("/api/abouts")
+	{
+		aboutApi.GET("/:cafe_id", aboutController.GetAboutByCafeID)
+		aboutApi.POST("/", aboutController.CreateAboutHandler)
+		aboutApi.PUT("/:id", aboutController.UpdateAboutHandler)
 	}
 }

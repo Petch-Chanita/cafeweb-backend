@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"cafeweb-backend/services"
+	"cafeweb-backend/utils"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -19,6 +20,14 @@ func NewUploadController(uploadService *services.UploadService) *UploadControlle
 func (c *UploadController) UploadImage(ctx *gin.Context) {
 	cafeID := ctx.Param("cafe_id")
 
+	claims, err := utils.GetClaimsFromToken(ctx)
+	if err != nil {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		return
+	}
+
+	userID := claims["id"].(string)
+
 	// รับไฟล์จาก request
 	_, FileHeader, err := ctx.Request.FormFile("image")
 	if err != nil {
@@ -27,7 +36,7 @@ func (c *UploadController) UploadImage(ctx *gin.Context) {
 	}
 
 	// เรียกใช้ Service เพื่ออัปโหลดไฟล์
-	fileUrl, err := c.UploadService.UploadFile(cafeID, FileHeader)
+	fileUrl, err := c.UploadService.UploadFile(cafeID, userID, FileHeader)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

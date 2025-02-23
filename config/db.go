@@ -21,6 +21,7 @@ func InitDB() {
 
 	dsn := os.Getenv("DATABASE_URL")
 	db, err := gorm.Open("postgres", dsn)
+	log.Println("DATABASE_URL:", dsn)
 	if err != nil {
 		log.Fatal("Failed to connect to database:", err)
 	}

@@ -3,6 +3,7 @@ package config
 import (
 	"log"
 	"os"
+	"time"
 
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
@@ -25,6 +26,10 @@ func InitDB() {
 	if err != nil {
 		log.Fatal("Failed to connect to database:", err)
 	}
+
+	db.DB().SetMaxOpenConns(5)
+	db.DB().SetMaxIdleConns(2)
+	db.DB().SetConnMaxLifetime(time.Minute * 10)
 
 	DB = db
 	log.Println("Database connected!")

@@ -76,17 +76,22 @@ func (s *AboutService) UpdateAbout(id string, updatedData *models.Abouts) error 
 	return nil
 }
 
-func (s *AboutService) GetAboutByCafeID(cafeID string) (*models.Abouts, error) {
+func (s *AboutService) GetAboutByCafeID(cafeID string) (models.Abouts, error) {
 	var about models.Abouts
+	tx := s.DB.Begin()
 
-	// ดึงข้อมูล About โดยใช้ cafe_id
-	err := s.DB.Preload("Cafe").Where("cafe_id = ?", cafeID).First(&about).Error
+	err := tx.Preload("Cafe").Where("cafe_id = ?", cafeID).First(&about).Error
 	if err != nil {
+		// ถ้าเกิด error ให้ทำการ rollback
+		tx.Rollback()
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, errors.New("About not found for the given cafe_id")
+			return about, errors.New("About not found for the given cafe_id")
 		}
-		return nil, err // หากเกิด error อื่นๆ
+		return about, err
 	}
 
-	return &about, nil
+	// Commit การทำงานทั้งหมดใน Transaction
+	tx.Commit()
+
+	return about, nil
 }

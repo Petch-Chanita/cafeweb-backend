@@ -79,12 +79,6 @@ func (c *AboutController) GetAboutByCafeID(ctx *gin.Context) {
 		return
 	}
 
-	if about == nil {
-		// ถ้าไม่พบข้อมูล
-		ctx.JSON(http.StatusNotFound, gin.H{"message": "About not found for this cafe"})
-		return
-	}
-
 	// ส่งข้อมูลที่ได้กลับไปใน response
 	ctx.JSON(http.StatusOK, about)
 }

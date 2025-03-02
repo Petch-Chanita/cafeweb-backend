@@ -1,6 +1,8 @@
 package models
 
-import "time"
+import (
+	"time"
+)
 
 // Cafe struct ใช้ BaseModel เพื่อให้มี fields ที่เราต้องการ
 type Cafes struct {

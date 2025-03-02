@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"cafeweb-backend/config"
+	"cafeweb-backend/migration"
 	"cafeweb-backend/routes"
 
 	"github.com/gin-contrib/cors"
@@ -13,10 +14,6 @@ import (
 )
 
 func main() {
-
-	// โหลด ENV และเชื่อมต่อฐานข้อมูล
-	config.InitDB()
-
 	r := gin.Default()
 
 	// ตั้งค่า CORS middleware
@@ -27,11 +24,17 @@ func main() {
 		AllowCredentials: true,                                                // ถ้าต้องการส่งข้อมูล Cookie หรือ Credential
 	}))
 
+	// เชื่อมต่อฐานข้อมูล
+	db, err := config.InitDB() // ฟังก์ชันในการเชื่อมต่อฐานข้อมูล
+	if err != nil {
+		log.Fatal("Failed to connect to database:", err)
+	}
+
 	// ตั้งค่า routes
 	routes.SetUpRoutes(r)
 
 	// เรียกใช้ฟังก์ชันเพื่อทำ migration
-	// migration.RunMigration()
+	migration.RunMigration(db)
 
 	jwtSecret := os.Getenv("JWT_SECRET")
 	apiKey := os.Getenv("API_KEY")

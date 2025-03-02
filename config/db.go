@@ -13,7 +13,7 @@ import (
 var DB *gorm.DB
 
 // InitDB เชื่อมต่อฐานข้อมูล
-func InitDB() {
+func InitDB() (*gorm.DB, error) {
 	// โหลดค่าจากไฟล์ .env
 	err := godotenv.Load()
 	if err != nil {
@@ -33,4 +33,6 @@ func InitDB() {
 
 	DB = db
 	log.Println("Database connected!")
+	return db, nil
+
 }

@@ -18,7 +18,7 @@ func main() {
 
 	// ตั้งค่า CORS middleware
 	r.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"*"},                                       // อนุญาตให้ทุกโดเมนสามารถเข้าถึงได้
+		AllowOrigins:     []string{"http://localhost:5173"},                   // อนุญาตให้ทุกโดเมนสามารถเข้าถึงได้
 		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}, // เมธอดที่อนุญาต
 		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"}, // เฮดเดอร์ที่อนุญาต
 		AllowCredentials: true,                                                // ถ้าต้องการส่งข้อมูล Cookie หรือ Credential

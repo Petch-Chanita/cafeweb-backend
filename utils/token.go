@@ -13,7 +13,7 @@ import (
 var secretKey = "JWT_SECRET" // คีย์สำหรับการสร้าง JWT
 
 // GenerateToken - ฟังก์ชันสร้าง JWT Token
-func GenerateToken(userID uuid.UUID, userName string, role string, image *string) (string, error) {
+func GenerateToken(userID uuid.UUID, userName string, role string, image *string, cafeID string) (string, error) {
 	claims := jwt.MapClaims{
 		"id":       userID.String(),                       // รหัสผู้ใช้
 		"iat":      time.Now().Unix(),                     // เวลาที่ Token ถูกสร้าง
@@ -21,6 +21,7 @@ func GenerateToken(userID uuid.UUID, userName string, role string, image *string
 		"username": userName,                              // ชื่อผู้ใช้
 		"role":     role,
 		"image":    image,
+		"cafe_id":  cafeID,
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)

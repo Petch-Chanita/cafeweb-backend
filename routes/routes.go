@@ -10,29 +10,36 @@ import (
 
 // SetUpRoutes - ฟังก์ชันสำหรับตั้งค่า routes
 func SetUpRoutes(router *gin.Engine) {
-	// สร้าง instance ของ UserService และ UserController
+	// ====== Services ======
 	userService := services.NewUserService(config.DB)
-	userController := controllers.NewUserController(userService)
-
-	// สร้าง instance ของ CafeService และ UserController
 	cafeService := services.NewCafeService(config.DB)
-	cafeController := controllers.NewCafeController(cafeService)
-
 	uploadService := services.NewUploadService(config.DB)
-	uploadController := controllers.NewUploadController(uploadService)
-
 	aboutService := services.NewAboutService(config.DB)
-	aboutController := controllers.NewAboutController(aboutService)
+	productService := services.NewProductService(config.DB)
 
+	// ====== Controllers ======
+	userController := controllers.NewUserController(userService)
+	cafeController := controllers.NewCafeController(cafeService)
+	uploadController := controllers.NewUploadController(uploadService)
+	aboutController := controllers.NewAboutController(aboutService)
+	productController := controllers.NewProductController(productService)
+
+	// ====== Static Files ======
 	router.Static("/uploads", "./uploads")
-	// ตั้งค่า route สำหรับการอัปโหลด
+
+	// ====== Routes ======
+
+	// Upload routes
 	router.POST("/api/upload/:cafe_id", uploadController.UploadImage)
 
+	// Auth routes
 	authApi := router.Group("/api/auth")
 	{
 		authApi.POST("/login-admin", userController.Login)
 		authApi.POST("/register", userController.RegisterUser)
 	}
+
+	// User routes
 	userApi := router.Group("/api/users")
 	{
 		userApi.GET("/", userController.GetAllUsers)
@@ -40,6 +47,8 @@ func SetUpRoutes(router *gin.Engine) {
 		userApi.PUT("/:id", userController.UpdateUser)
 		userApi.DELETE("/", userController.DeleteUser)
 	}
+
+	// Cafe routes
 	cafeApi := router.Group("/api/cafe")
 	{
 		cafeApi.GET("/", cafeController.GetAllCafe)
@@ -47,10 +56,20 @@ func SetUpRoutes(router *gin.Engine) {
 		cafeApi.PUT("/update-cafe/:id", cafeController.UpdateCafe)
 		cafeApi.POST("/create-cafe", cafeController.CreateCafe)
 	}
+
+	// About routes
 	aboutApi := router.Group("/api/abouts")
 	{
 		aboutApi.GET("/:cafe_id", aboutController.GetAboutByCafeID)
 		aboutApi.POST("/", aboutController.CreateAboutHandler)
 		aboutApi.PUT("/:id", aboutController.UpdateAboutHandler)
+	}
+
+	//Product routes
+	productApi := router.Group("/api/product")
+	{
+		productApi.POST("/", productController.CreateProduct)
+		productApi.GET("/", productController.GetProduct)
+		productApi.POST("/category", productController.CreateCategories)
 	}
 }

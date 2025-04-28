@@ -33,7 +33,7 @@ func (s *UserService) LoginUser(username, password string) (string, error) {
 	}
 
 	// สร้าง JWT token
-	token, err := utils.GenerateToken(user.ID, user.Username, user.Role, user.Image)
+	token, err := utils.GenerateToken(user.ID, user.Username, user.Role, user.Image, user.CafeID)
 	if err != nil {
 		return "", err
 	}

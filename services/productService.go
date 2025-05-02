@@ -31,6 +31,7 @@ func (s *ProductService) CreateProduct(req dto.ProductRequest) (out dto.ProductR
 		ImageURL:    req.ImageURL,
 		CategoryID:  req.CategoryID,
 		CafeID:      req.CafeID,
+		Status:      models.StatusType(req.Status),
 		Description: req.Description,
 	}
 
@@ -51,6 +52,7 @@ func (s *ProductService) CreateProduct(req dto.ProductRequest) (out dto.ProductR
 	out.ImageURL = product.ImageURL
 	out.Price = product.Price
 	out.ProductName = product.ProductName
+	out.Status = product.Status
 	out.Description = product.Description
 
 	// คืนค่าข้อมูล product ที่ถูกสร้างแล้ว
@@ -89,17 +91,41 @@ func (s *ProductService) CreateCategories(req dto.CategoryRequest) (err error) {
 	return nil
 }
 
+func (s *ProductService) GetCategories(cafeID string) (out []dto.CategoryResponse, err error) {
+	tx := s.db.Begin()
+
+	var category []models.Categories
+	if err := tx.Where("cafe_id =?", cafeID).Find(&category).Error; err != nil {
+		tx.Rollback()
+		return out, nil
+	}
+	if len(category) == 0 {
+		return nil, errors.New("no category found for this cafe")
+	} else {
+		fmt.Println("Found category:", category)
+	}
+
+	for _, p := range category {
+		var pr dto.CategoryResponse
+		copier.Copy(&pr, &p)
+		out = append(out, pr)
+	}
+	tx.Commit()
+	return out, nil
+}
+
 func (s *ProductService) GetProduct(cafeID string) (out []dto.ProductResponse, err error) {
 	tx := s.db.Begin()
 	var products []models.Products
 
 	fmt.Println("cafeID :: ", cafeID)
 
-	if err := tx.Where("cafe_id = ?", cafeID).
+	if err := tx.Preload("Category").Where("cafe_id = ?", cafeID).
 		Find(&products).Error; err != nil {
 		tx.Rollback()
 		return nil, err
 	}
+
 	fmt.Println("cafeID products:: ", products)
 
 	if len(products) == 0 {
@@ -111,6 +137,7 @@ func (s *ProductService) GetProduct(cafeID string) (out []dto.ProductResponse, e
 	for _, p := range products {
 		var pr dto.ProductResponse
 		copier.Copy(&pr, &p)
+		pr.CategoryName = p.Category.CategoryName
 		out = append(out, pr)
 	}
 

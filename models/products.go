@@ -1,5 +1,14 @@
 package models
 
+type StatusType string
+
+const (
+	StatusAvailable   StatusType = "available"
+	StatusUnavailable StatusType = "unavailable"
+	StatusSeasonal    StatusType = "seasonal"
+	StatusDisabled    StatusType = "disabled"
+)
+
 // Product struct สำหรับสร้างตาราง products
 type Products struct {
 	BaseModel // รวมฟิลด์ที่เป็นพื้นฐาน เช่น ID, CreatedAt, UpdatedAt, DeletedAt
@@ -9,8 +18,9 @@ type Products struct {
 	CafeID      string `gorm:"type:uuid;index" json:"cafe_id"`                // foreign key อ้างอิงจาก Cafe
 	CategoryID  string `gorm:"type:uuid;index" json:"category_id"`            // foreign key อ้างอิงจาก Category
 
-	ImageURL    string `gorm:"type:text" json:"image_url"`   // URL รูปภาพ
-	Description string `gorm:"type:text" json:"description"` // คำอธิบายสินค้า
+	ImageURL    string     `gorm:"type:text" json:"image_url"`                  // URL รูปภาพ
+	Description string     `gorm:"type:text" json:"description"`                // คำอธิบายสินค้า
+	Status      StatusType `gorm:"type:text;default:'available'" json:"status"` //สถานะสินค้า
 
 	Cafe     Cafes      `gorm:"foreignKey:CafeID" json:"cafe"`         // ความสัมพันธ์กับ Cafe
 	Category Categories `gorm:"foreignKey:CategoryID" json:"category"` // ความสัมพันธ์กับ Category

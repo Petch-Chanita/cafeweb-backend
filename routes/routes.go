@@ -71,5 +71,6 @@ func SetUpRoutes(router *gin.Engine) {
 		productApi.POST("/", productController.CreateProduct)
 		productApi.GET("/", productController.GetProduct)
 		productApi.POST("/category", productController.CreateCategories)
+		productApi.GET("/category", productController.GetCategories)
 	}
 }

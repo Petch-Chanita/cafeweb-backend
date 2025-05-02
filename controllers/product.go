@@ -92,3 +92,25 @@ func (c *ProductController) CreateCategories(ctx *gin.Context) {
 		"message": "category created successfully",
 	})
 }
+
+func (c *ProductController) GetCategories(ctx *gin.Context) {
+	claims, err := utils.GetClaimsFromToken(ctx)
+	if err != nil {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		return
+	}
+
+	cafeID, ok := claims["cafe_id"].(string)
+	if !ok {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "cafe_id not found in token"})
+		return
+	}
+
+	data, err := c.ProductService.GetCategories(cafeID)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		return
+	}
+
+	ctx.JSON(http.StatusCreated, data)
+}

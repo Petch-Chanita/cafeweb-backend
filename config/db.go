@@ -21,6 +21,9 @@ func InitDB() (*gorm.DB, error) {
 	}
 
 	dsn := os.Getenv("DATABASE_URL")
+	if dsn == "" {
+		log.Fatal("❌ DATABASE_URL is not set in .env file")
+	}
 	db, err := gorm.Open("postgres", dsn)
 	log.Println("DATABASE_URL:", dsn)
 	if err != nil {

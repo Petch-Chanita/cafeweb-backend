@@ -1,28 +1,28 @@
 package routes
 
 import (
-	"cafeweb-backend/config"
 	"cafeweb-backend/controllers"
 	"cafeweb-backend/services"
 
 	"github.com/gin-gonic/gin"
+	"github.com/jinzhu/gorm"
 )
 
 // SetUpRoutes - ฟังก์ชันสำหรับตั้งค่า routes
-func SetUpRoutes(router *gin.Engine) {
+func SetUpRoutes(router *gin.Engine, db *gorm.DB) {
 	// ====== Services ======
-	userService := services.NewUserService(config.DB)
-	cafeService := services.NewCafeService(config.DB)
-	uploadService := services.NewUploadService(config.DB)
-	aboutService := services.NewAboutService(config.DB)
-	productService := services.NewProductService(config.DB)
+	userService := services.NewUserService(db)
+	cafeService := services.NewCafeService(db)
+	uploadService := services.NewUploadService(db)
+	aboutService := services.NewAboutService(db)
+	productService := services.NewProductService(db)
 
 	// ====== Controllers ======
 	userController := controllers.NewUserController(userService)
 	cafeController := controllers.NewCafeController(cafeService)
 	uploadController := controllers.NewUploadController(uploadService)
 	aboutController := controllers.NewAboutController(aboutService)
-	productController := controllers.NewProductController(productService)
+	productController := controllers.NewProductController(productService, uploadService)
 
 	// ====== Static Files ======
 	router.Static("/uploads", "./uploads")
@@ -69,7 +69,11 @@ func SetUpRoutes(router *gin.Engine) {
 	productApi := router.Group("/api/product")
 	{
 		productApi.POST("/", productController.CreateProduct)
+		productApi.POST("/:id", productController.UpdateProduct)
 		productApi.GET("/", productController.GetProduct)
+		productApi.GET("/:id", productController.GetProductByID)
+		productApi.DELETE("/", productController.DeleteMultipleProducts)
+
 		productApi.POST("/category", productController.CreateCategories)
 		productApi.GET("/category", productController.GetCategories)
 	}

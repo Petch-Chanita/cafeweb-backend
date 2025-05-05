@@ -30,8 +30,9 @@ func main() {
 		log.Fatal("Failed to connect to database:", err)
 	}
 
+	log.Printf("db", db)
 	// ตั้งค่า routes
-	routes.SetUpRoutes(r)
+	routes.SetUpRoutes(r, db)
 
 	// เรียกใช้ฟังก์ชันเพื่อทำ migration
 	migration.RunMigration(db)

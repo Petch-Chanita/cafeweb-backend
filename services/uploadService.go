@@ -2,6 +2,7 @@ package services
 
 import (
 	"fmt"
+	"log"
 	"mime/multipart"
 	"os"
 
@@ -12,15 +13,27 @@ import (
 )
 
 type UploadService struct {
-	DB *gorm.DB
+	db *gorm.DB
 }
 
 func NewUploadService(db *gorm.DB) *UploadService {
-	return &UploadService{DB: db}
+	return &UploadService{db: db}
 }
 
 // ฟังก์ชันสำหรับอัปโหลดไฟล์
 func (s *UploadService) UploadFile(cafeID string, userID string, file *multipart.FileHeader) (string, error) {
+	if s.db == nil {
+		log.Println("❌ UploadService.db is nil")
+		return "", fmt.Errorf("internal server error: database not initialized")
+	}
+
+	tx := s.db.Begin()
+	if file == nil {
+		return "", fmt.Errorf("file header is nil")
+	}
+
+	log.Println("File name:", file.Filename)
+
 	uploadDir := "uploads"
 
 	// ตรวจสอบว่ามีโฟลเดอร์ `uploads` หรือไม่ ถ้าไม่มีให้สร้างใหม่
@@ -32,6 +45,9 @@ func (s *UploadService) UploadFile(cafeID string, userID string, file *multipart
 	}
 	// กำหนดที่เก็บไฟล์
 	uploadPath := "uploads/" + file.Filename
+
+	log.Println("File name::", file.Filename)
+	log.Println("uploadPath:", uploadPath)
 
 	// เปิดไฟล์สำหรับเขียน
 	src, err := file.Open()
@@ -69,7 +85,18 @@ func (s *UploadService) UploadFile(cafeID string, userID string, file *multipart
 		UserID:   userID,
 	}
 
-	if err := s.DB.Create(&image).Error; err != nil {
+	if image.URL == "" || image.Filename == "" {
+		return "", fmt.Errorf("invalid image data")
+	}
+	log.Println("image", &image)
+
+	if err := tx.Create(&image).Error; err != nil {
+		tx.Rollback()
+		return "", fmt.Errorf("failed to create image record: %v", err)
+	}
+
+	if err := tx.Commit().Error; err != nil {
+		tx.Rollback()
 		return "", err
 	}
 
